@@ -1,1 +1,0 @@
-# Nereye-Gitsem-

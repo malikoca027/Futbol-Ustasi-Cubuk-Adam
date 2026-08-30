@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nereye Gitsem?</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#fff7e8,#eaf7ff);
+  color:#222;
+  min-height:100vh;
+}
+
+header{
+  background:linear-gradient(135deg,#ff7a00,#ffb300);
+  color:white;
+  text-align:center;
+  padding:28px 15px;
+  box-shadow:0 4px 16px #0002;
+}
+
+header h1{
+  margin:0;
+  font-size:36px;
+}
+
+header p{
+  margin:10px auto 0;
+  max-width:650px;
+  font-size:16px;
+  line-height:1.5;
+}
+
+.container{
+  max-width:760px;
+  margin:22px auto;
+  padding:0 14px;
+}
+
+.card{
+  background:white;
+  border-radius:24px;
+  padding:20px;
+  box-shadow:0 8px 28px #0001;
+  margin-bottom:18px;
+}
+
+h2{
+  text-align:center;
+  margin:4px 0 8px;
+}
+
+.info{
+  text-align:center;
+  color:#666;
+  margin:0 0 18px;
+  line-height:1.5;
+}
+
+.items{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.item{
+  border:2px solid #eee;
+  background:#fafafa;
+  border-radius:19px;
+  padding:16px 9px;
+  cursor:pointer;
+  min-height:108px;
+  font-size:16px;
+  font-weight:bold;
+  transition:.18s;
+}
+
+.item:hover{
+  transform:translateY(-2px);
+  border-color:#ffad42;
+}
+
+.item.selected{
+  background:#fff3df;
+  border-color:#ff8a00;
+  box-shadow:0 4px 12px #ff980022;
+}
+
+.emoji{
+  display:block;
+  font-size:38px;
+  margin-bottom:7px;
+}
+
+.selected-count{
+  text-align:center;
+  margin:18px 0 4px;
+  font-weight:bold;
+}
+
+button{
+  width:100%;
+  border:0;
+  border-radius:16px;
+  padding:15px;
+  font-size:17px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.find{
+  background:#ff8500;
+  color:white;
+  margin-top:12px;
+}
+
+.clear{
+  background:#eee;
+  color:#333;
+  margin-top:9px;
+}
+
+.results{
+  margin-top:18px;
+}
+
+.place{
+  border:2px solid #eee;
+  border-radius:19px;
+  padding:17px;
+  margin:11px 0;
+  background:#fcfcfc;
+}
+
+.place h3{
+  margin:0 0 10px;
+  font-size:21px;
+}
+
+.reason{
+  color:#555;
+  line-height:1.5;
+}
+
+.badge{
+  display:inline-block;
+  background:#eaf7ee;
+  color:#18753b;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:bold;
+}
+
+.empty{
+  text-align:center;
+  background:#fff7e8;
+  border-radius:18px;
+  padding:18px;
+  color:#8a5a00;
+  line-height:1.5;
+}
+
+@media(max-width:520px){
+  header h1{
+    font-size:30px;
+  }
+
+  .items{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .item{
+    min-height:100px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+  <h1>🗺️ Nereye Gitsem?</h1>
+
+  <p>
+    Evindeki eşyaları seç.
+    Seçtiğin eşyalarla nereye gidebileceğini keşfet!
+  </p>
+
+</header>
+
+
+<div class="container">
+
+<section class="card">
+
+  <h2>🏠 Evindeki Eşyaları Seç</h2>
+
+  <p class="info">
+    Sahip olduğun eşyaların üzerine dokunarak seç.
+    Sonra bakalım seni hangi yerlere götürebiliriz!
+  </p>
+
+  <div class="items" id="items"></div>
+
+  <div class="selected-count">
+    <span id="count">0</span> eşya seçtin
+  </div>
+
+  <button class="find" onclick="findPlaces()">
+    🔎 Nereye Gidebilirim?
+  </button>
+
+  <button class="clear" onclick="clearAll()">
+    ↩️ Seçimleri Temizle
+  </button>
+
+</section>
+
+
+<section class="card results" id="results" style="display:none">
+
+  <h2>📍 Gidebileceğin Yerler</h2>
+
+  <p class="info" id="resultInfo"></p>
+
+  <div id="places"></div>
+
+</section>
+
+</div>
+
+
+<script>
+
+const items = [
+
+  ["📱","Telefon"],
+  ["💧","Su"],
+  ["🎧","Kulaklık"],
+  ["📚","Kitap"],
+  ["⚽","Top"],
+  ["🧴","Güneş kremi"],
+  ["🕶️","Güneş gözlüğü"],
+  ["🏖️","Havlu"],
+  ["☂️","Şemsiye"],
+  ["⛺","Çadır"],
+  ["🍎","Yiyecek"],
+  ["🧢","Şapka"],
+  ["🧥","Mont"],
+  ["🩴","Terlik"],
+  ["🧺","Piknik örtüsü"],
+  ["✏️","Kalem"],
+  ["🎲","Oyun"],
+  ["🎣","Olta"],
+  ["🎒","Sırt çantası"],
+  ["🧻","Islak mendil"]
+
+];
+
+
+const places = [
+
+  {
+    emoji:"🏖️",
+    name:"Plaj",
+    need:[
+      "Su",
+      "Güneş kremi",
+      "Güneş gözlüğü",
+      "Havlu",
+      "Terlik",
+      "Şapka",
+      "Sırt çantası",
+      "Islak mendil"
+    ],
+    min:3,
+    text:"Deniz kenarında vakit geçirmek için kullanışlı eşyaların var."
+  },
+
+
+  {
+    emoji:"🏕️",
+    name:"Kamp",
+    need:[
+      "Çadır",
+      "Su",
+      "Yiyecek",
+      "Mont",
+      "Sırt çantası",
+      "Islak mendil"
+    ],
+    min:3,
+    text:"Kamp yapmak ve doğada vakit geçirmek için uygun eşyalar seçtin."
+  },
+
+
+  {
+    emoji:"🧺",
+    name:"Piknik",
+    need:[
+      "Yiyecek",
+      "Su",
+      "Piknik örtüsü",
+      "Top",
+      "Şapka",
+      "Sırt çantası",
+      "Islak mendil"
+    ],
+    min:3,
+    text:"Piknik yapmak için kullanabileceğin birkaç eşyan var."
+  },
+
+
+  {
+    emoji:"🌳",
+    name:"Park",
+    need:[
+      "Top",
+      "Su",
+      "Şapka",
+      "Oyun",
+      "Kulaklık",
+      "Sırt çantası",
+      "Islak mendil"
+    ],
+    min:2,
+    text:"Parkta eğlenmek ve dinlenmek için güzel bir seçenek."
+  },
+
+
+  {
+    emoji:"📚",
+    name:"Kütüphane",
+    need:[
+      "Kitap",
+      "Kulaklık",
+      "Su",
+      "Kalem",
+      "Sırt çantası"
+    ],
+    min:2,
+    text:"Okumak ve sakin bir şekilde çalışmak için uygun eşyaların var."
+  },
+
+
+  {
+    emoji:"🎣",
+    name:"Balık Tutmaya",
+    need:[
+      "Olta",
+      "Su",
+      "Yiyecek",
+      "Şapka",
+      "Sırt çantası",
+      "Islak mendil"
+    ],
+    min:2,
+    required:"Olta",
+    text:"Balık tutmak için oltan ve yanında işine yarayabilecek eşyaların var."
+  },
+
+
+  {
+    emoji:"🏫",
+    name:"Okula",
+    need:[
+      "Sırt çantası",
+      "Kitap",
+      "Kalem",
+      "Su",
+      "Telefon"
+    ],
+    min:3,
+    text:"Okula giderken kullanabileceğin temel eşyaların var."
+  }
+
+];
+
+
+const selected = new Set();
+
+const box = document.getElementById("items");
+
+
+items.forEach((item) => {
+
+  const button = document.createElement("button");
+
+  button.className = "item";
+
+  button.innerHTML =
+    `<span class="emoji">${item[0]}</span>${item[1]}`;
+
+  button.onclick = () => {
+
+    if(selected.has(item[1])){
+
+      selected.delete(item[1]);
+
+      button.classList.remove("selected");
+
+    }else{
+
+      selected.add(item[1]);
+
+      button.classList.add("selected");
+
+    }
+
+    updateCount();
+
+  };
+
+  box.appendChild(button);
+
+});
+
+
+function updateCount(){
+
+  document.getElementById("count").textContent =
+    selected.size;
+
+}
+
+
+function clearAll(){
+
+  selected.clear();
+
+  document
+    .querySelectorAll(".item")
+    .forEach(item => item.classList.remove("selected"));
+
+  updateCount();
+
+  document.getElementById("results").style.display = "none";
+
+}
+
+
+function findPlaces(){
+
+  const results =
+    document.getElementById("results");
+
+  const placesBox =
+    document.getElementById("places");
+
+  const info =
+    document.getElementById("resultInfo");
+
+
+  results.style.display = "block";
+
+  placesBox.innerHTML = "";
+
+
+  if(selected.size === 0){
+
+    info.textContent = "";
+
+    placesBox.innerHTML = `
+      <div class="empty">
+
+        😅 Önce evindeki eşyalardan birkaç tane seç.
+
+        <br><br>
+
+        Sonra bakalım nereye gidebilirsin!
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const matches = places
+
+    .map(place => {
+
+      const matched =
+        place.need.filter(item =>
+          selected.has(item)
+        );
+
+      return {
+        ...place,
+        matched
+      };
+
+    })
+
+    .filter(place => {
+
+      if(place.required && !selected.has(place.required)){
+        return false;
+      }
+
+      return place.matched.length >= place.min;
+
+    })
+
+    .sort((a,b) =>
+      b.matched.length - a.matched.length
+    );
+
+
+  if(matches.length === 0){
+
+    info.textContent =
+      "Seçtiğin eşyalara uygun bir yer bulamadık.";
+
+    placesBox.innerHTML = `
+      <div class="empty">
+
+        🤔 Birkaç eşya daha seçmeyi dene.
+
+        <br><br>
+
+        Daha fazla eşya seçersen farklı yerler çıkabilir.
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  info.textContent =
+    `Seçtiğin ${selected.size} eşyaya göre uygun yerler:`;
+
+
+  matches.forEach((place,index) => {
+
+    const div =
+      document.createElement("div");
+
+    div.className = "place";
+
+    div.innerHTML = `
+
+      <h3>
+
+        ${place.emoji} ${place.name}
+
+        ${
+          index === 0
+          ? '<span class="badge">En uygun</span>'
+          : ''
+        }
+
+      </h3>
+
+
+      <p class="reason">
+
+        ${place.text}
+
+      </p>
+
+
+      <b>Bu yer için seçtiğin eşyalar:</b>
+
+
+      <p>
+
+        ${place.matched.join(" • ")}
+
+      </p>
+
+    `;
+
+    placesBox.appendChild(div);
+
+  });
+
+
+  results.scrollIntoView({
+    behavior:"smooth"
+  });
+
+}
+
+</script>
+
+</body>
+</html>
